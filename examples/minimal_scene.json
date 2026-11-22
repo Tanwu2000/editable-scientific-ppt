@@ -1,0 +1,17 @@
+{
+  "width": 360,
+  "height": 260,
+  "elements": [
+    {"kind":"text","name":"panel-title","x":60,"y":15,"width":260,"height":24,"size":16,"alignment":"center","text":"Native editable figure"},
+    {"kind":"shape","name":"mesh-layer","fill":"none","stroke":"#536471","lineWidth":0.7,"clip":[60,60,320,205],"paths":[
+      {"points":[[20,85],[350,85]]}, {"points":[[20,125],[350,125]]}, {"points":[[20,165],[350,165]]},
+      {"points":[[100,35],[100,230]]}, {"points":[[160,35],[160,230]]}, {"points":[[220,35],[220,230]]}, {"points":[[280,35],[280,230]]}
+    ]},
+    {"kind":"shape","name":"curve-layer","fill":"none","stroke":"#B77811","lineWidth":2,"clip":[60,60,320,205],"paths":[{"points":[[30,220],[85,190],[140,145],[195,110],[250,85],[345,65]]}]},
+    {"kind":"shape","name":"axes","fill":"none","stroke":"#000000","lineWidth":1.2,"paths":[{"points":[[60,60],[60,205],[320,205]]}]},
+    {"kind":"text","name":"x-axis","x":95,"y":219,"width":180,"height":20,"size":12,"alignment":"center","text":"Displacement, δ (µm)"},
+    {"kind":"text","name":"y-axis","x":-35,"y":123,"width":145,"height":20,"size":12,"alignment":"center","rotation":-90,"text":"Force, F (nN)"},
+    {"kind":"text","name":"subscript-label","x":235,"y":43,"width":90,"height":18,"size":12,"runs":[{"text":"u","style":{"italic":true}},{"text":"r","style":{"italic":true,"size":9,"baseline":-25000}},{"text":" = 0","style":{}}]},
+    {"kind":"text","name":"zero-tick","x":45,"y":206,"width":20,"height":15,"size":10,"text":"0"}
+  ]
+}

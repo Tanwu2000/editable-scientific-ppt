@@ -1,0 +1,6 @@
+interface:
+  display_name: "Editable Scientific PPT"
+  short_description: "Native editable scientific figures for PowerPoint"
+  default_prompt: "Use $editable-scientific-ppt to make this scientific figure editable in PowerPoint, preserving the layout, text and subplot clipping."
+policy:
+  allow_implicit_invocation: true
