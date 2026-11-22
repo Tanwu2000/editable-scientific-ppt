@@ -1,0 +1,9 @@
+{
+  "input_segments": 114,
+  "retained_segments": 114,
+  "cropped_segments": 0,
+  "textboxes": 17,
+  "native_shapes": 85,
+  "raster_images": 0,
+  "all_clipped_geometry_inside_panel": true
+}

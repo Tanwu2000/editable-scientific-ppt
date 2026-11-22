@@ -7,3 +7,5 @@ build/
 *.zip
 .DS_Store
 Thumbs.db
+examples/gallery/artifacts/
+!examples/gallery/results/*/*.pptx

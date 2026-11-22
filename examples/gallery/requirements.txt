@@ -1,0 +1,5 @@
+# Optional dependencies for reproducing the gallery; not required by the core exporter.
+matplotlib==3.9.2
+numpy==2.0.2
+lxml==4.9.1
+Pillow==9.2.0

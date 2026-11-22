@@ -1,0 +1,150 @@
+{
+  "powerPointVersion": "16.0",
+  "officeBuild": "16.0.20527.20196",
+  "cases": [
+    {
+      "case": "01_math",
+      "nativeTextboxes": 17,
+      "fontEditSaved": true,
+      "lineEditSaved": true,
+      "editedText": "text_14 Scaling curves [97]",
+      "editedLine": "line2d_76 [91]",
+      "svgConversion": "SVGEdit",
+      "structure": {
+        "native": {
+          "slides": 1,
+          "width_pt": 388.8,
+          "height_pt": 259.2,
+          "textboxes": 17,
+          "vector_shapes": 85,
+          "images": 0,
+          "fonts": [
+            "Arial",
+            "Cambria Math"
+          ],
+          "external_links": 0
+        },
+        "svg-converted": {
+          "slides": 1,
+          "width_pt": 388.75,
+          "height_pt": 259.25,
+          "textboxes": 61,
+          "vector_shapes": 85,
+          "images": 0,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        }
+      }
+    },
+    {
+      "case": "02_mesh",
+      "nativeTextboxes": 29,
+      "fontEditSaved": true,
+      "lineEditSaved": true,
+      "editedText": "text_14 Full mesh [32]",
+      "editedLine": "LineCollection_1 [28]",
+      "svgConversion": "SVGEdit",
+      "structure": {
+        "native": {
+          "slides": 1,
+          "width_pt": 532.8,
+          "height_pt": 244.8,
+          "textboxes": 29,
+          "vector_shapes": 34,
+          "images": 0,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        },
+        "svg-converted": {
+          "slides": 1,
+          "width_pt": 532.75,
+          "height_pt": 244.75,
+          "textboxes": 45,
+          "vector_shapes": 144,
+          "images": 0,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        }
+      }
+    },
+    {
+      "case": "03_field",
+      "nativeTextboxes": 23,
+      "fontEditSaved": true,
+      "lineEditSaved": true,
+      "editedText": "text_19 Displacement field [45]",
+      "editedLine": "line2d_17 [39]",
+      "svgConversion": "SVGEdit",
+      "structure": {
+        "native": {
+          "slides": 1,
+          "width_pt": 388.8,
+          "height_pt": 259.2,
+          "textboxes": 23,
+          "vector_shapes": 29,
+          "images": 2,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        },
+        "svg-converted": {
+          "slides": 1,
+          "width_pt": 388.75,
+          "height_pt": 259.25,
+          "textboxes": 36,
+          "vector_shapes": 29,
+          "images": 2,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        }
+      }
+    },
+    {
+      "case": "04_errorbars",
+      "nativeTextboxes": 18,
+      "fontEditSaved": true,
+      "lineEditSaved": true,
+      "editedText": "text_15 Response with error bars [137]",
+      "editedLine": "LineCollection_1 [30]",
+      "svgConversion": "SVGEdit",
+      "structure": {
+        "native": {
+          "slides": 1,
+          "width_pt": 388.8,
+          "height_pt": 259.2,
+          "textboxes": 18,
+          "vector_shapes": 136,
+          "images": 0,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        },
+        "svg-converted": {
+          "slides": 1,
+          "width_pt": 388.75,
+          "height_pt": 259.25,
+          "textboxes": 59,
+          "vector_shapes": 166,
+          "images": 0,
+          "fonts": [
+            "Arial"
+          ],
+          "external_links": 0
+        }
+      }
+    }
+  ],
+  "testedDate": "2026-11-22",
+  "data": "Synthetic deterministic fixtures; not experimental or finite-element results.",
+  "comparison": "Same source SVG; actual PowerPoint slide exports; no retouching inside plots."
+}

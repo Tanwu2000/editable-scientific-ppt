@@ -1,0 +1,2 @@
+# Preserve the exact Matplotlib SVG fixtures, including generated path whitespace.
+examples/gallery/results/*/source.svg -whitespace

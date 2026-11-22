@@ -15,3 +15,5 @@ Reconstruct mathematical labels into ordered native rich-text runs. Derive order
 Native shapes are generally editable in batches. Thousands of mesh segments can share one freeform object with multiple subpaths; a user can then change that layer's stroke without selecting thousands of objects. Explain this granularity. Do not merge labels with paths.
 
 Do not redistribute fonts. Check font availability and clearly report substitution. Support Unicode µ, δ, γ and minus signs without replacing them with images.
+
+Legacy symbol fonts may put a mathematical glyph in an ordinary character slot. In the gallery fixture, Matplotlib's cmsy10 stores proportional-to at `/`; copying that slash into Arial changes the formula. Decode the verified glyph to Unicode and use a font that contains it (Cambria Math in this fixture). Also check rendered super/subscript size: the tested PowerPoint build shrinks baseline-shifted runs to 65%, so supplying an already reduced SVG font size applies the shrink twice. The fixture adapter compensates for that behavior; verify it again for other renderers.

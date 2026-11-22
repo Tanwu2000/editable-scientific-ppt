@@ -2,7 +2,7 @@
 name: editable-scientific-ppt
 description: Create or repair scientific figures as native editable PowerPoint objects, with editable text, curves and mesh lines, correct mathematical labels and preclipped subplot geometry. Use for manuscript figures that must remain editable in PPT, especially when SVG conversion causes overlaps or escaping lines.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Editable scientific PowerPoint figures
@@ -29,6 +29,8 @@ Inspect the reference before rebuilding. Identify panel bounds, figure dimension
 Use the native presentation authoring library available in the environment. The portable helper [scripts/native_pptx.py](scripts/native_pptx.py) is a bounded fallback: it writes a one-slide PPTX from explicit scene coordinates with Python's standard library. It is **not** a general SVG/PDF importer. The scene schema and commands are in [scene-format.md](references/scene-format.md). The included synthetic example exercises clipping, rotation, Unicode and subscript text.
 
 Keep the original source and intermediate geometry separate from final output. If adapting a converter, reject unsupported transforms, path commands, fonts or masks instead of silently dropping them. Do not copy machine-specific runtime paths into reusable scripts.
+
+For reproducible examples and actual PowerPoint comparison renders, see [examples/gallery/README.md](examples/gallery/README.md). Its SVG adapter is limited to those Matplotlib fixtures, not a general importer.
 
 ## Verification and delivery
 

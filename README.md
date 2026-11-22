@@ -1,71 +1,108 @@
 # Editable Scientific PPT
 
-把科研图制作成原生可编辑 PowerPoint：文字是真正的文本框，曲线和网格是可编辑形状，子图边界在导出前完成几何裁切。适用于 SVG 转形状后出现文字堆叠、字体变化和跨子图长线的问题。
+**在 PowerPoint 中直接修改科研图的文字、字号、曲线颜色和网格线宽。**
 
-**版本：0.1.0；作者：Tanwu2000；许可证：MIT。** 不包含论文数据、Abaqus 模型、个人路径、凭据或私有运行库。
+将绘图代码、数据或矢量图重建为原生可编辑 PPTX。文字保留为文本框，曲线和网格保留为形状，越界线条在导出前完成裁切。打开后即可编辑，无需再执行“转为形状”。
 
-## 调用
+[效果对比](#效果对比) · [安装](#安装) · [使用](#使用) · [示例与复现](examples/gallery/README.md) · [MIT 许可证](LICENSE)
 
-安装后在 Codex 中输入：
+## 效果对比
 
-> 使用 $editable-scientific-ppt，把这张科研图做成原生可编辑 PPTX。文字使用 Arial，可修改字号；网格与曲线可修改线宽；保留原布局，裁切越界线条，同时输出 PNG 和 600 dpi TIFF。
+以下四组均来自实际 PowerPoint 渲染。**左侧：Matplotlib SVG 插入 PPT 后“转为形状”；右侧：采用本 skill 的原生 PPTX。** 两侧使用同一份合成数据和源图。
 
-也可以自然语言请求“可编辑的 PPT 科研图”。自动匹配取决于宿主是否支持技能发现。
+测试环境：Windows PowerPoint，Office Build **16.0.20527.20196**。不同版本、字体和 SVG 导出方式的表现可能不同。
+
+### 1. 双对数曲线与数学标注
+
+处理希腊字母、上下标和旋转轴标签；将源 SVG 中的符号字体编码还原为可编辑 Unicode 文字。
+
+![双对数曲线：SVG 转形状与原生 PPTX 对比](examples/gallery/results/01_math/comparison.png)
+
+[下载可编辑 PPTX](examples/gallery/results/01_math/native.pptx) · [普通转换 PPTX](examples/gallery/results/01_math/svg-converted.pptx) · [原始绘图](examples/gallery/results/01_math/source.png)
+
+### 2. 网格与局部放大
+
+普通转换后的局部网格越过坐标轴边界。原生版本先裁切几何，再生成可编辑的网格层。
+
+![网格裁切：SVG 转形状与原生 PPTX 对比](examples/gallery/results/02_mesh/comparison.png)
+
+[下载可编辑 PPTX](examples/gallery/results/02_mesh/native.pptx) · [普通转换 PPTX](examples/gallery/results/02_mesh/svg-converted.pptx) · [原始绘图](examples/gallery/results/02_mesh/source.png)
+
+### 3. 云图、色标与单位
+
+保留连续色彩图像，独立编辑坐标、色标文字和叠加线条。云图与色条本身仍是位图。
+
+![云图：SVG 转形状与原生 PPTX 对比](examples/gallery/results/03_field/comparison.png)
+
+[下载可编辑 PPTX](examples/gallery/results/03_field/native.pptx) · [普通转换 PPTX](examples/gallery/results/03_field/svg-converted.pptx) · [原始绘图](examples/gallery/results/03_field/source.png)
+
+### 4. 误差棒、多曲线与图例
+
+普通转换在本例中基本保留了曲线和误差棒，但改变了混合文本的间距。原生版本将轴标题和图例保留为完整文本框，便于统一修改。
+
+![误差棒：SVG 转形状与原生 PPTX 对比](examples/gallery/results/04_errorbars/comparison.png)
+
+[下载可编辑 PPTX](examples/gallery/results/04_errorbars/native.pptx) · [普通转换 PPTX](examples/gallery/results/04_errorbars/svg-converted.pptx) · [原始绘图](examples/gallery/results/04_errorbars/source.png)
+
+四个原生示例均已测试：修改标题字号、修改线宽、保存并重新打开。完整记录及修改后的文件见[实测说明](examples/gallery/README.md)。
 
 ## 安装
 
-将**整个仓库文件夹**复制或克隆为个人技能目录下的 `editable-scientific-ppt`，确保该目录直接包含 `SKILL.md`。此用户环境的技能目录是 `~/.codex/skills`；不同宿主可按自己的技能发现规则选择目录。不要把仓库父目录当成技能目录。
+在 Codex 中使用 `$skill-installer`：
 
-GitHub 发布后的仓库地址为 `https://github.com/Tanwu2000/editable-scientific-ppt`。可让 Codex 的 `$skill-installer` 从该地址安装，或使用官方安装脚本的 `--repo Tanwu2000/editable-scientific-ppt --path . --name editable-scientific-ppt`。已有同名目录时，官方安装器会拒绝覆盖。
+> 安装 https://github.com/Tanwu2000/editable-scientific-ppt 中的 skill，路径为仓库根目录。
 
-本地复制安装：
+也可直接克隆到个人技能目录（需要 Git）：
 
 ```sh
-python tools/install_local.py --dest ~/.codex/skills
+git clone https://github.com/Tanwu2000/editable-scientific-ppt.git ~/.codex/skills/editable-scientific-ppt
 ```
 
-安装后在下一次请求中调用；若宿主尚未发现，可重新打开会话或重启宿主。
+若使用自定义 `CODEX_HOME`，将目标改为该目录下的 `skills/editable-scientific-ppt`。安装后重新打开会话；如仍未显示，重启 Codex。
 
-## 更新会自动同步吗？
+## 使用
 
-通常不会。Skill 是文件，发布 GitHub 更新不会直接改写别人已经安装的本地副本，也不会修改以前生成的 PPTX。
+提供绘图代码和数据，或保留文字的 SVG，然后输入：
 
-| 安装方式 | 更新方式 |
+> 使用 $editable-scientific-ppt，把这张科研图做成原生可编辑 PPTX。保留布局，文字使用 Arial，可修改字号；曲线和网格可修改线宽、颜色；裁切越界线条。同时输出 PNG 和 600 dpi TIFF。
+
+优先提供源代码和数据。只有截图时，无法准确恢复被遮挡文字或原始数据。
+
+| 图中内容 | 编辑方式 |
 |---|---|
-| 官方安装器或复制安装 | 先保留本地修改和旧版本，再安装新版本 |
-| Git 克隆进技能目录 | 在该目录执行 `git pull --ff-only`；有本地改动先检查，不强制覆盖 |
-| 固定 tag/commit | 只有主动切换版本才更新，适合可复现科研流程 |
-| 托管插件 | 取决于该平台的分发与更新机制，本仓库不承诺自动更新 |
+| 标题、坐标、刻度、图例、简单数学标注 | 原生文本框，可修改字体、字号和文字 |
+| 曲线、误差棒、标记、边界 | 原生形状，可修改线条与颜色 |
+| 密集网格 | 分层或分批的自由曲线，可修改整层线条 |
+| 连续云图、显微图像 | 保留为图像，周围文字独立编辑 |
 
-本仓库的本地安装工具默认不覆盖。对复制安装进行更新时，从已下载/审阅的新版本执行：
+曲线是可编辑形状，不是关联 Excel 数据表的原生图表。复杂公式、非矩形蒙版和带孔填充可能需要专门重建；本工具不承诺任意 SVG/PDF 一键无损转换。
+
+## 更新
+
+GitHub 更新**不会自动覆盖已安装的副本**，也不会修改已生成的 PPTX。
+
+Git 克隆安装可在检查本地改动后更新：
+
+```sh
+git -C ~/.codex/skills/editable-scientific-ppt pull --ff-only
+```
+
+复制安装可从下载的新版本目录执行：
 
 ```sh
 python tools/install_local.py --dest ~/.codex/skills --update
 ```
 
-工具会先把旧技能移动到技能目录旁的备份目录，再安装新版本，失败时回滚。不联网、不自动拉取、不定时更新。Git 安装请通过 Git 更新，不用此工具替换。
+复制更新会先备份旧版本，失败时回滚。需要固定版本时，可使用仓库的版本标签。
 
-## 脚本与能力边界
+## 开发接口
 
-- `scripts/native_pptx.py`：从显式 JSON 场景生成单页原生 PPTX，使用 Python 标准库。
-- `scripts/inspect_pptx.py`：结构审查，统计原生文本、自由曲线与图片。
-- `examples/minimal_scene.json`：合成示例，不代表实验或有限元结果。
-- `references/`：几何、文字、场景格式及 PowerPoint 验证说明。
-
-这不是任意 SVG/PDF 一键完美转换器。复杂公式、蒙版、渐变、带孔多边形等需要其他合适的后端或从源绘图代码重建。云图可以是图像，其轴标签和图例文字仍可独立编辑。文字编辑能力、形状编辑能力和数据表驱动的图表编辑能力是不同概念。
-
-## 验证
+核心场景导出器仅依赖 Python 标准库：
 
 ```sh
-python -m unittest discover -s tests -v
 python scripts/native_pptx.py examples/minimal_scene.json build/example.pptx
 python scripts/inspect_pptx.py build/example.pptx
+python -m unittest discover -s tests -v
 ```
 
-结构验证不能替代 PowerPoint 视觉与编辑验证，见 `references/powerpoint-qa.md`。
-
-## 发布与维护
-
-后续修改先更新 `VERSION` 和 `SKILL.md` 的版本，运行测试，再提交并打 tag（如 `v0.1.1`）。保持核心技能简短，新增已验证的规则与案例，避免把某一张图的偏好写成所有图都必须遵守的规则。
-
-参考：[官方技能说明](https://learn.chatgpt.com/docs/build-skills)；[官方安装器](https://github.com/openai/skills/tree/main/skills/.system/skill-installer)。
+[场景格式](references/scene-format.md) · [文字与几何处理](references/geometry-and-text.md) · [PowerPoint 验证](references/powerpoint-qa.md)
