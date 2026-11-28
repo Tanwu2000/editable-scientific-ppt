@@ -6,6 +6,16 @@
 
 [效果对比](#效果对比) · [安装](#安装) · [使用](#使用) · [示例与复现](examples/gallery/README.md) · [MIT 许可证](LICENSE)
 
+## v0.1.2 更新
+
+- **可以整体组合与拆分**：默认生成整图组合，支持子图分组。文字、曲线、网格和图片可以取消组合后重新组合，支持整体移动与缩放。
+- **更简洁的版式**：标题按绘图区居中；默认不添加生成说明、编辑提示或灰色小字。单位、图例和必要的科学标注保留。
+- **更清晰的线条**：坐标轴、边框和文字默认黑色；轴线/边框 1.2 pt、曲线 1.5 pt、网格 0.7 pt，可按需求调整。论文 PNG/TIFF 默认按实际尺寸导出 600 dpi。
+
+![黑色边框与线宽对比](examples/v012/results/03_clarity-comparison.png)
+
+左侧为显式设置的细灰线问题复现，右侧为新默认样式；两侧均为真实 PowerPoint 渲染。[查看三组新测试与下载 PPTX、PNG、TIFF](examples/v012/README.md) · [更新日志](CHANGELOG.md)
+
 ## 效果对比
 
 以下四组均来自实际 PowerPoint 渲染。**左侧：Matplotlib SVG 插入 PPT 后“转为形状”；右侧：采用本 skill 的原生 PPTX。** 两侧使用同一份合成数据和源图。
@@ -65,6 +75,8 @@ git clone https://github.com/Tanwu2000/editable-scientific-ppt.git ~/.codex/skil
 提供绘图代码和数据，或保留文字的 SVG，然后输入：
 
 > 使用 $editable-scientific-ppt，把这张科研图做成原生可编辑 PPTX。保留布局，文字使用 Arial，可修改字号；曲线和网格可修改线宽、颜色；裁切越界线条。同时输出 PNG 和 600 dpi TIFF。
+
+默认交付已组合的图形；可在 PowerPoint 中取消组合后编辑各部分，再重新组合。标题按绘图区居中，边框使用黑色。明确指定的字体、颜色和线宽优先。
 
 优先提供源代码和数据。只有截图时，无法准确恢复被遮挡文字或原始数据。
 

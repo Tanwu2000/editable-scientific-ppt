@@ -7,7 +7,7 @@ import shutil
 import tempfile
 
 NAME='editable-scientific-ppt'
-ALLOW=('SKILL.md','VERSION','README.md','LICENSE','agents','references','scripts','examples','tools')
+ALLOW=('SKILL.md','VERSION','README.md','CHANGELOG.md','LICENSE','agents','references','scripts','examples','tools')
 
 def install(source,dest,update=False):
     source=Path(source).resolve();dest=Path(dest).expanduser().resolve();target=dest/NAME

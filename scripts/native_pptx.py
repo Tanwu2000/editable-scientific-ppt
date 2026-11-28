@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile, ZIP_DEFLATED
+from figure_style import prepare_scene, ROLES
 
 NS = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main',
       'p': 'http://schemas.openxmlformats.org/presentationml/2006/main',
@@ -104,13 +105,20 @@ def clipped_paths(el):
     return result
 
 def validate_scene(scene):
-    fields(scene,'width height elements')
+    fields(scene,'width height elements group showHelperText')
+    for key in ('group','showHelperText'):
+        if key in scene and not isinstance(scene[key],bool): raise ValueError('Expected boolean: '+key)
     for k in ('width','height'):
         if number(scene[k]) <= 0 or scene[k] > 4032: raise ValueError('Slide dimensions must be in (0, 4032] points')
     for el in scene['elements']:
         kind=el['kind']
-        common='kind name '
-        if kind=='shape':
+        common='kind name role '
+        if el.get('role') is not None and el['role'] not in ROLES: raise ValueError('Unsupported role')
+        if kind=='group':
+            fields(el,common+'elements')
+            if not isinstance(el['elements'],list) or not el['elements']: raise ValueError('Empty group')
+            validate_scene({'width':scene['width'],'height':scene['height'],'elements':el['elements']})
+        elif kind=='shape':
             fields(el,common+'paths fill stroke lineWidth dash clip')
             color(el.get('fill','none')); color(el.get('stroke','#000000'))
             if number(el.get('lineWidth',1))<0: raise ValueError('Negative line width')
@@ -124,10 +132,14 @@ def validate_scene(scene):
                     if len(pt)!=2: raise ValueError('Expected x,y pairs')
                     for v in pt: number(v)
         elif kind in ('text','image'):
-            fields(el,common+'x y width height '+('text runs size font color alignment rotation' if kind=='text' else 'file'))
+            fields(el,common+'x y width height '+('text runs size font color alignment rotation centerOn' if kind=='text' else 'file'))
             for k in ('x','y','width','height'): number(el[k])
             if el['width']<=0 or el['height']<=0: raise ValueError('Non-positive object dimensions')
             if kind=='text':
+                if el.get('role')=='title' and 'centerOn' not in el: raise ValueError('Title requires centerOn: [left,right]')
+                if 'centerOn' in el:
+                    b=el['centerOn']
+                    if len(b)!=2 or number(b[0])>=number(b[1]): raise ValueError('Invalid centerOn interval')
                 if el.get('alignment','left') not in ('left','center','right'): raise ValueError('Unsupported alignment')
                 number(el.get('rotation',0)); color(el.get('color','#000000'))
                 if not 1 <= number(el.get('size',12)) <= 4000: raise ValueError('Invalid text size')
@@ -163,6 +175,26 @@ def group(parent):
     for tag,attr in [('off',{'x':0,'y':0}),('ext',{'cx':0,'cy':0}),('chOff',{'x':0,'y':0}),('chExt',{'cx':0,'cy':0})]:node('a:'+tag,attr,tr)
     return tree
 
+def set_group_transform(grp, prop):
+    # Identity mapping of slide-coordinate children; bounds include rotated text.
+    corners=[]
+    for child in grp:
+        tr=child.find('p:spPr/a:xfrm',NS)
+        if tr is None: tr=child.find('p:grpSpPr/a:xfrm',NS)
+        if tr is None: continue
+        off=tr.find('a:off',NS); ext=tr.find('a:ext',NS)
+        x,y=float(off.get('x')),float(off.get('y'))
+        w,h=float(ext.get('cx')),float(ext.get('cy'))
+        angle=math.radians(float(tr.get('rot',0))/60000)
+        c,t=math.cos(angle),math.sin(angle)
+        for xx,yy in ((-w/2,-h/2),(w/2,-h/2),(w/2,h/2),(-w/2,h/2)):
+            corners.append((x+w/2+c*xx-t*yy,y+h/2+t*xx+c*yy))
+    if not corners: corners=[(0,0),(1,1)]
+    x=math.floor(min(v[0] for v in corners));y=math.floor(min(v[1] for v in corners))
+    w=max(1,math.ceil(max(v[0] for v in corners))-x);h=max(1,math.ceil(max(v[1] for v in corners))-y)
+    tr=node('a:xfrm',parent=prop)
+    for tag,attrs in [('off',{'x':x,'y':y}),('ext',{'cx':w,'cy':h}),('chOff',{'x':x,'y':y}),('chExt',{'cx':w,'cy':h})]:node('a:'+tag,attrs,tr)
+
 def relationships(entries):
     root=ET.Element('Relationships',xmlns=REL)
     for ident,kind,target in entries:
@@ -170,63 +202,81 @@ def relationships(entries):
     return xml(root)
 
 def build(scene,base,output):
-    validate_scene(scene); output=Path(output)
+    validate_scene(scene); scene=prepare_scene(scene); output=Path(output)
     if output.exists(): raise FileExistsError('Refusing to overwrite '+str(output))
     slide=node('p:sld'); tree=group(node('p:cSld',parent=slide)); media={}
     rels=[('rId1','slideLayout','../slideLayouts/slideLayout1.xml')]
-    counts={'textboxes':0,'vector_shapes':0,'images':0}
-    for i,original in enumerate(scene['elements'],2):
-        el=copy.deepcopy(original); kind=el['kind']; name=el.get('name',kind)+' ['+str(i)+']'
-        if kind=='shape':
-            paths=clipped_paths(el)
-            if not paths: continue
-            pts=[pt for path in paths for pt in path['points']]
-            x=min(p[0] for p in pts);y=min(p[1] for p in pts)
-            w=max(.001,max(p[0] for p in pts)-x);h=max(.001,max(p[1] for p in pts)-y)
-            sp=node('p:sp',parent=tree);nonvisual(sp,i,name)
-            pr=node('p:spPr',parent=sp);transform(pr,x,y,w,h)
-            geo=node('a:custGeom',parent=pr)
-            for tag in ('avLst','gdLst','ahLst','cxnLst'):node('a:'+tag,parent=geo)
-            node('a:rect',{'l':'l','t':'t','r':'r','b':'b'},geo)
-            pl=node('a:pathLst',parent=geo)
-            for path in paths:
-                pp=node('a:path',{'w':max(1,emu(w)),'h':max(1,emu(h)),'fill':'norm' if path.get('filled',False) else 'none','stroke':int(path.get('stroke',True))},pl)
-                for j,(xx,yy) in enumerate(path['points']):
-                    node('a:pt',{'x':emu(xx-x),'y':emu(yy-y)},node('a:lnTo' if j else 'a:moveTo',parent=pp))
-                if path['closed']:node('a:close',parent=pp)
-            fill(pr,el.get('fill','none'))
-            ln=node('a:ln',{'w':emu(el.get('lineWidth',1))},pr);fill(ln,el.get('stroke','#000000'))
-            if el.get('dash'):node('a:prstDash',{'val':'dash'},ln)
-            counts['vector_shapes']+=1
-        elif kind=='text':
-            sp=node('p:sp',parent=tree);nonvisual(sp,i,name,text=True)
-            pr=node('p:spPr',parent=sp);transform(pr,el['x'],el['y'],el['width'],el['height'],el.get('rotation',0))
-            node('a:avLst',parent=node('a:prstGeom',{'prst':'rect'},pr));fill(pr,'none');fill(node('a:ln',parent=pr),'none')
-            tx=node('p:txBody',parent=sp)
-            bp=node('a:bodyPr',{'wrap':'none','lIns':0,'rIns':0,'tIns':0,'bIns':0,'anchor':'t'},tx);node('a:noAutofit',parent=bp)
-            node('a:lstStyle',parent=tx);para=node('a:p',parent=tx)
-            node('a:pPr',{'algn':{'left':'l','center':'ctr','right':'r'}[el.get('alignment','left')]},para)
-            runs=el.get('runs',[{'text':el.get('text',''),'style':{}}])
-            for run in runs:
-                st=run.get('style',{});r=node('a:r',parent=para)
-                rp=node('a:rPr',{'lang':'en-US','sz':round(st.get('size',el.get('size',12))*100),'b':int(st.get('bold',False)),'i':int(st.get('italic',False)),'baseline':round(st.get('baseline',0))},r)
-                fill(rp,st.get('color',el.get('color','#000000')))
-                for tag in ('latin','ea','cs'):node('a:'+tag,{'typeface':st.get('font',el.get('font','Arial'))},rp)
-                node('a:t',parent=r,text=run['text'])
-            node('a:endParaRPr',{'lang':'en-US','sz':round(el.get('size',12)*100)},para);counts['textboxes']+=1
-        else:
-            file=Path(el['file'])
-            if not file.is_absolute():file=Path(base)/file
-            data=file.read_bytes();ext=file.suffix.lower().lstrip('.')
-            if ext not in ('png','jpg','jpeg'):raise ValueError('Only PNG/JPEG images are supported')
-            if not (data.startswith(b'\x89PNG\r\n\x1a\n') if ext=='png' else data.startswith(b'\xff\xd8\xff')):raise ValueError('Image signature does not match extension')
-            dest='image'+str(i)+'.'+ext;media['ppt/media/'+dest]=data;rid='rId'+str(len(rels)+1)
-            rels.append((rid,'image','../media/'+dest))
-            pic=node('p:pic',parent=tree);nonvisual(pic,i,name,picture=True)
-            bf=node('p:blipFill',parent=pic);node('a:blip',{'{'+NS['r']+'}embed':rid},bf)
-            node('a:fillRect',parent=node('a:stretch',parent=bf))
-            pr=node('p:spPr',parent=pic);transform(pr,el['x'],el['y'],el['width'],el['height'])
-            node('a:avLst',parent=node('a:prstGeom',{'prst':'rect'},pr));counts['images']+=1
+    counts={'textboxes':0,'vector_shapes':0,'images':0,'groups':0}
+    i=1
+    def emit(elements,tree):
+        nonlocal i
+        for original in elements:
+            i+=1; el=copy.deepcopy(original); kind=el['kind']; name=el.get('name',kind)+' ['+str(i)+']'
+            if kind=='group':
+                grp=node('p:grpSp',parent=tree)
+                nv=node('p:nvGrpSpPr',parent=grp);node('p:cNvPr',{'id':i,'name':name},nv)
+                node('p:cNvGrpSpPr',parent=nv);node('p:nvPr',parent=nv)
+                prop=node('p:grpSpPr',parent=grp)
+                emit(el['elements'],grp)
+                if len(grp)==2:
+                    tree.remove(grp)
+                    continue
+                set_group_transform(grp,prop)
+                counts['groups']+=1
+            elif kind=='shape':
+                paths=clipped_paths(el)
+                if not paths: continue
+                pts=[pt for path in paths for pt in path['points']]
+                x=min(p[0] for p in pts);y=min(p[1] for p in pts)
+                w=max(.001,max(p[0] for p in pts)-x);h=max(.001,max(p[1] for p in pts)-y)
+                sp=node('p:sp',parent=tree);nonvisual(sp,i,name)
+                pr=node('p:spPr',parent=sp);transform(pr,x,y,w,h)
+                geo=node('a:custGeom',parent=pr)
+                for tag in ('avLst','gdLst','ahLst','cxnLst'):node('a:'+tag,parent=geo)
+                node('a:rect',{'l':'l','t':'t','r':'r','b':'b'},geo)
+                pl=node('a:pathLst',parent=geo)
+                for path in paths:
+                    pp=node('a:path',{'w':max(1,emu(w)),'h':max(1,emu(h)),'fill':'norm' if path.get('filled',False) else 'none','stroke':int(path.get('stroke',True))},pl)
+                    for j,(xx,yy) in enumerate(path['points']):
+                        node('a:pt',{'x':emu(xx-x),'y':emu(yy-y)},node('a:lnTo' if j else 'a:moveTo',parent=pp))
+                    if path['closed']:node('a:close',parent=pp)
+                fill(pr,el.get('fill','none'))
+                ln=node('a:ln',{'w':emu(el.get('lineWidth',1))},pr);fill(ln,el.get('stroke','#000000'))
+                if el.get('dash'):node('a:prstDash',{'val':'dash'},ln)
+                counts['vector_shapes']+=1
+            elif kind=='text':
+                sp=node('p:sp',parent=tree);nonvisual(sp,i,name,text=True)
+                pr=node('p:spPr',parent=sp);transform(pr,el['x'],el['y'],el['width'],el['height'],el.get('rotation',0))
+                node('a:avLst',parent=node('a:prstGeom',{'prst':'rect'},pr));fill(pr,'none');fill(node('a:ln',parent=pr),'none')
+                tx=node('p:txBody',parent=sp)
+                bp=node('a:bodyPr',{'wrap':'none','lIns':0,'rIns':0,'tIns':0,'bIns':0,'anchor':'t'},tx);node('a:noAutofit',parent=bp)
+                node('a:lstStyle',parent=tx);para=node('a:p',parent=tx)
+                node('a:pPr',{'algn':{'left':'l','center':'ctr','right':'r'}[el.get('alignment','left')]},para)
+                runs=el.get('runs',[{'text':el.get('text',''),'style':{}}])
+                for run in runs:
+                    st=run.get('style',{});r=node('a:r',parent=para)
+                    rp=node('a:rPr',{'lang':'en-US','sz':round(st.get('size',el.get('size',12))*100),'b':int(st.get('bold',False)),'i':int(st.get('italic',False)),'baseline':round(st.get('baseline',0))},r)
+                    fill(rp,st.get('color',el.get('color','#000000')))
+                    for tag in ('latin','ea','cs'):node('a:'+tag,{'typeface':st.get('font',el.get('font','Arial'))},rp)
+                    node('a:t',parent=r,text=run['text'])
+                node('a:endParaRPr',{'lang':'en-US','sz':round(el.get('size',12)*100)},para);counts['textboxes']+=1
+            else:
+                file=Path(el['file'])
+                if not file.is_absolute():file=Path(base)/file
+                data=file.read_bytes();ext=file.suffix.lower().lstrip('.')
+                if ext not in ('png','jpg','jpeg'):raise ValueError('Only PNG/JPEG images are supported')
+                if not (data.startswith(b'\x89PNG\r\n\x1a\n') if ext=='png' else data.startswith(b'\xff\xd8\xff')):raise ValueError('Image signature does not match extension')
+                dest='image'+str(i)+'.'+ext;media['ppt/media/'+dest]=data;rid='rId'+str(len(rels)+1)
+                rels.append((rid,'image','../media/'+dest))
+                pic=node('p:pic',parent=tree);nonvisual(pic,i,name,picture=True)
+                bf=node('p:blipFill',parent=pic);node('a:blip',{'{'+NS['r']+'}embed':rid},bf)
+                node('a:fillRect',parent=node('a:stretch',parent=bf))
+                pr=node('p:spPr',parent=pic);transform(pr,el['x'],el['y'],el['width'],el['height'])
+                node('a:avLst',parent=node('a:prstGeom',{'prst':'rect'},pr));counts['images']+=1
+    elements=scene['elements']
+    if scene.get('group',True) and elements and not (len(elements)==1 and elements[0]['kind']=='group'):
+        elements=[{'kind':'group','name':'Figure','elements':elements}]
+    emit(elements,tree)
     node('a:masterClrMapping',parent=node('p:clrMapOvr',parent=slide))
     master=node('p:sldMaster');group(node('p:cSld',parent=master))
     node('p:clrMap',dict(bg1='lt1',tx1='dk1',bg2='lt2',tx2='dk2',accent1='accent1',accent2='accent2',accent3='accent3',accent4='accent4',accent5='accent5',accent6='accent6',hlink='hlink',folHlink='folHlink'),master)

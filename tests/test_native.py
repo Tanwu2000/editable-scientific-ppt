@@ -12,6 +12,7 @@ sys.path.insert(0,str(ROOT/'scripts'));sys.path.insert(0,str(ROOT/'tools'))
 from native_pptx import build, clipped_paths, segment, polygon, validate_scene, NS
 from inspect_pptx import inspect
 from install_local import install
+from figure_style import prepare_scene
 
 class NativeTests(unittest.TestCase):
     def setUp(self):self.scene=json.loads((ROOT/'examples/minimal_scene.json').read_text(encoding='utf-8'))
@@ -52,6 +53,59 @@ class NativeTests(unittest.TestCase):
     def test_unsupported_properties_fail(self):
         self.scene['elements'][0]['opacity']=0.2
         with self.assertRaises(ValueError):validate_scene(self.scene)
+
+    def test_nested_group_identity_bounds_and_unique_ids(self):
+        # Non-origin panel coordinates and rotated labels must not move on grouping.
+        self.scene['elements']=[{'kind':'group','name':'Panel','elements':self.scene['elements']}]
+        with tempfile.TemporaryDirectory() as tmp:
+            out=Path(tmp)/'group.pptx';build(self.scene,ROOT/'examples',out)
+            report=inspect(out)
+            self.assertEqual((report['groups'],report['textboxes'],report['vector_shapes']),(1,5,3))
+            self.assertEqual((report['grouping_locks'],report['placeholders']),(0,0))
+            with ZipFile(out) as z:
+                slide=ET.fromstring(z.read('ppt/slides/slide1.xml'))
+                for tr in slide.findall('.//p:grpSp/p:grpSpPr/a:xfrm',NS):
+                    self.assertEqual(tr.find('a:off',NS).attrib,tr.find('a:chOff',NS).attrib)
+                    self.assertEqual(tr.find('a:ext',NS).attrib,tr.find('a:chExt',NS).attrib)
+                    self.assertGreater(int(tr.find('a:ext',NS).get('cx')),0)
+                # Child coordinates survive exactly; group bounds include rotated text.
+                label=next(e for e in slide.findall('.//p:sp',NS) if 'y-axis' in e.find('p:nvSpPr/p:cNvPr',NS).get('name'))
+                self.assertEqual(int(label.find('p:spPr/a:xfrm/a:off',NS).get('x')),-35*12700)
+
+    def test_title_roles_helper_optin_and_explicit_style(self):
+        original=copy.deepcopy(self.scene)
+        title=self.scene['elements'][0]
+        title.update(role='title',centerOn=[60,320],x=2,width=10,alignment='left')
+        self.scene['elements'] += [{'kind':'text','name':'helper','role':'helper','x':0,'y':0,'width':100,'height':20,'text':'Generated with exporter'},
+                                   {'kind':'text','name':'science-note','x':0,'y':0,'width':100,'height':20,'text':'n = 12'}]
+        ready=prepare_scene(self.scene)
+        self.assertEqual((ready['elements'][0]['x'],ready['elements'][0]['width'],ready['elements'][0]['alignment']),(60,260,'center'))
+        self.assertNotIn('helper',[e['name'] for e in ready['elements']])
+        self.assertIn('science-note',[e['name'] for e in ready['elements']])
+        self.assertEqual(self.scene['elements'][0]['x'],2) # input not mutated
+        self.assertEqual(ready['elements'][1]['stroke'],original['elements'][1]['stroke'])
+        self.scene['showHelperText']=True
+        self.assertIn('helper',[e['name'] for e in prepare_scene(self.scene)['elements']])
+
+    def test_line_role_defaults_preserve_explicit_overrides(self):
+        template={'kind':'shape','paths':[{'points':[[0,0],[10,10]]}]}
+        scene={'width':100,'height':100,'elements':[dict(template,role=r) for r in ['axis','border','curve','mesh']]}
+        ready=prepare_scene(scene)
+        self.assertEqual([e['lineWidth'] for e in ready['elements']],[1.2,1.2,1.5,.7])
+        self.assertTrue(all(e['stroke']=='#000000' for e in ready['elements']))
+        scene['elements'][0].update(stroke='#123456',lineWidth=2)
+        self.assertEqual(prepare_scene(scene)['elements'][0]['stroke'],'#123456')
+        self.assertEqual(prepare_scene(scene)['elements'][0]['lineWidth'],2)
+
+    def test_flat_optout_and_fully_clipped_group(self):
+        self.scene['group']=False
+        with tempfile.TemporaryDirectory() as tmp:
+            out=Path(tmp)/'flat.pptx';build(self.scene,ROOT/'examples',out)
+            self.assertEqual(inspect(out)['groups'],0)
+            self.scene['group']=True
+            self.scene['elements']=[{'kind':'group','elements':[{'kind':'shape','clip':[0,0,5,5],'paths':[{'points':[[10,10],[20,20]]}]}]}]
+            out=Path(tmp)/'empty.pptx';build(self.scene,ROOT/'examples',out)
+            self.assertEqual(inspect(out)['groups'],0)
 
     def test_filled_clip_does_not_stroke_artificial_boundary(self):
         paths=clipped_paths({'fill':'#EEEEEE','stroke':'#000000','clip':[0,0,5,5],

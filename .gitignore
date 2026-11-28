@@ -9,3 +9,5 @@ build/
 Thumbs.db
 examples/gallery/artifacts/
 !examples/gallery/results/*/*.pptx
+!examples/v012/results/*.pptx
+!examples/v012/results/*.tiff

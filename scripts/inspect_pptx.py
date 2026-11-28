@@ -22,8 +22,13 @@ def inspect(path):
                 if target not in names:raise ValueError('Missing relationship target: '+target)
         slides=[root for name,root in roots.items() if name.startswith('ppt/slides/slide') and name.endswith('.xml')]
         size=roots['ppt/presentation.xml'].find('p:sldSz',NS)
-        result={'slides':len(slides),'width_pt':int(size.get('cx'))/12700,'height_pt':int(size.get('cy'))/12700,'textboxes':0,'vector_shapes':0,'images':0,'fonts':set(),'texts':[],'external_links':0}
+        result={'slides':len(slides),'width_pt':int(size.get('cx'))/12700,'height_pt':int(size.get('cy'))/12700,'textboxes':0,'vector_shapes':0,'images':0,'fonts':set(),'texts':[],'external_links':0,'groups':0,'grouping_locks':0,'placeholders':0}
         for slide in slides:
+            result['groups']+=len(slide.findall('.//p:grpSp',NS))
+            result['placeholders']+=len(slide.findall('.//p:ph',NS))
+            result['grouping_locks']+=sum(e.get('noGrp') in ('1','true') for e in slide.iter())
+            ids=[e.get('id') for e in slide.findall('.//p:cNvPr',NS)]
+            if len(ids)!=len(set(ids)):raise ValueError('Duplicate shape IDs')
             result['images']+=len(slide.findall('.//p:pic',NS))
             for sp in slide.findall('.//p:sp',NS):
                 text=sp.find('p:txBody',NS)

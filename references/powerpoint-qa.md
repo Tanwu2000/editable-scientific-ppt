@@ -2,7 +2,7 @@
 
 Use a test copy of the generated PPTX, opening it without altering any user presentation.
 
-On Windows with desktop PowerPoint installed, the optional `tools/check_powerpoint.ps1` opens only the supplied file, renders a PNG, edits a disposable copy, and verifies persistence. It does not quit PowerPoint. Use a new output folder:
+On Windows with desktop PowerPoint installed, `tools/check_powerpoint.ps1` renders a 600 dpi PNG, tests grouping/ungrouping/regrouping, moves and scales the group, edits child text/line styles, and verifies persistence after reopening a disposable copy. It supports nested groups and does not quit PowerPoint. Use a new output folder:
 
 ```powershell
 ./tools/check_powerpoint.ps1 -InputPptx ./build/example.pptx -OutputDirectory ./build/powerpoint-qa
@@ -14,5 +14,7 @@ This uses the PowerPoint COM interface and may require interactive desktop permi
 2. Select a native title text box, increase its font size and change its text. Select a mesh/curve freeform and alter line width/color. A picture's resize handles alone do not establish editability.
 3. Save the test copy, close only that copy, reopen it, and confirm both edits persisted. Verify the original deliverable was not modified.
 4. If requested, export PNG at `round(width_points / 72 * dpi)` by `round(height_points / 72 * dpi)`. TIFF should come from that same rendered version with the requested resolution metadata and suitable compression. Inspect the raster output.
+
+Compare `preview.png` with `regrouped.png` for unintended layout changes; `edited.png` intentionally shows the moved/resized group and changed font/line width. `powerpoint-check.json` records the tested Office build and numeric assertions. Tests require at least two groupable objects, native text and a freeform. Use `-Dpi` or `-PreviewWidth` to change export size. Changing the PNG DPI metadata without changing dimensions is not a higher-resolution render.
 
 If PowerPoint is unavailable, use another renderer for a visual check and report that it is not a PowerPoint compatibility test. The XML audit cannot check glyph placement or renderer-specific problems. A single successful test does not guarantee every Office version or operating system.

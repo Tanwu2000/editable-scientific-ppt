@@ -1,0 +1,200 @@
+{
+  "date": "2026-11-28",
+  "cases": {
+    "01_grouping": {
+      "PowerPointVersion": "16.0",
+      "OfficeBuild": "16.0.20625.20108",
+      "LeafObjects": 42,
+      "Textboxes": 18,
+      "GroupUngroupRegroup": true,
+      "AllLeafObjectsGrouped": true,
+      "GroupMoveResizeSaved": true,
+      "FontEditSaved": true,
+      "LineEditSaved": true,
+      "ReopenedRegroup": true,
+      "PixelWidth": 5000,
+      "PixelHeight": 2250,
+      "EffectiveExportDpi": 600.0,
+      "VisualInspection": "Reviewed: intended geometry, text and raster layers preserved; edited copies intentionally change size and line weight.",
+      "RegroupMeanPixelError": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Structure": {
+        "slides": 1,
+        "width_pt": 600.0,
+        "height_pt": 270.0,
+        "textboxes": 18,
+        "vector_shapes": 23,
+        "images": 1,
+        "fonts": [
+          "Arial"
+        ],
+        "external_links": 0,
+        "groups": 3,
+        "grouping_locks": 0,
+        "placeholders": 0
+      },
+      "WindowsTiffPixelEquality": true,
+      "TiffDpi": [
+        600,
+        600
+      ]
+    },
+    "02_layout": {
+      "PowerPointVersion": "16.0",
+      "OfficeBuild": "16.0.20625.20108",
+      "LeafObjects": 18,
+      "Textboxes": 9,
+      "GroupUngroupRegroup": true,
+      "AllLeafObjectsGrouped": true,
+      "GroupMoveResizeSaved": true,
+      "FontEditSaved": true,
+      "LineEditSaved": true,
+      "ReopenedRegroup": true,
+      "PixelWidth": 2833,
+      "PixelHeight": 2250,
+      "EffectiveExportDpi": 599.9294117647058,
+      "VisualInspection": "Reviewed: intended geometry, text and raster layers preserved; edited copies intentionally change size and line weight.",
+      "RegroupMeanPixelError": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Structure": {
+        "slides": 1,
+        "width_pt": 340.0,
+        "height_pt": 270.0,
+        "textboxes": 9,
+        "vector_shapes": 9,
+        "images": 0,
+        "fonts": [
+          "Arial"
+        ],
+        "external_links": 0,
+        "groups": 1,
+        "grouping_locks": 0,
+        "placeholders": 0
+      },
+      "WindowsTiffPixelEquality": true,
+      "TiffDpi": [
+        600,
+        600
+      ]
+    },
+    "03_clarity": {
+      "PowerPointVersion": "16.0",
+      "OfficeBuild": "16.0.20625.20108",
+      "LeafObjects": 18,
+      "Textboxes": 9,
+      "GroupUngroupRegroup": true,
+      "AllLeafObjectsGrouped": true,
+      "GroupMoveResizeSaved": true,
+      "FontEditSaved": true,
+      "LineEditSaved": true,
+      "ReopenedRegroup": true,
+      "PixelWidth": 2833,
+      "PixelHeight": 2250,
+      "EffectiveExportDpi": 599.9294117647058,
+      "VisualInspection": "Reviewed: intended geometry, text and raster layers preserved; edited copies intentionally change size and line weight.",
+      "RegroupMeanPixelError": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Structure": {
+        "slides": 1,
+        "width_pt": 340.0,
+        "height_pt": 270.0,
+        "textboxes": 9,
+        "vector_shapes": 9,
+        "images": 0,
+        "fonts": [
+          "Arial"
+        ],
+        "external_links": 0,
+        "groups": 1,
+        "grouping_locks": 0,
+        "placeholders": 0
+      },
+      "WindowsTiffPixelEquality": true,
+      "TiffDpi": [
+        600,
+        600
+      ]
+    },
+    "02_layout_before": {
+      "PowerPointVersion": "16.0",
+      "OfficeBuild": "16.0.20625.20108",
+      "LeafObjects": 19,
+      "Textboxes": 10,
+      "GroupUngroupRegroup": true,
+      "AllLeafObjectsGrouped": true,
+      "GroupMoveResizeSaved": true,
+      "FontEditSaved": true,
+      "LineEditSaved": true,
+      "ReopenedRegroup": true,
+      "PixelWidth": 2833,
+      "PixelHeight": 2250,
+      "EffectiveExportDpi": 599.9294117647058,
+      "VisualInspection": "Reviewed: intended geometry, text and raster layers preserved; edited copies intentionally change size and line weight.",
+      "RegroupMeanPixelError": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Structure": {
+        "slides": 1,
+        "width_pt": 340.0,
+        "height_pt": 270.0,
+        "textboxes": 10,
+        "vector_shapes": 9,
+        "images": 0,
+        "fonts": [
+          "Arial"
+        ],
+        "external_links": 0,
+        "groups": 0,
+        "grouping_locks": 0,
+        "placeholders": 0
+      }
+    },
+    "03_clarity_before": {
+      "PowerPointVersion": "16.0",
+      "OfficeBuild": "16.0.20625.20108",
+      "LeafObjects": 18,
+      "Textboxes": 9,
+      "GroupUngroupRegroup": true,
+      "AllLeafObjectsGrouped": true,
+      "GroupMoveResizeSaved": true,
+      "FontEditSaved": true,
+      "LineEditSaved": true,
+      "ReopenedRegroup": true,
+      "PixelWidth": 2833,
+      "PixelHeight": 2250,
+      "EffectiveExportDpi": 599.9294117647058,
+      "VisualInspection": "Reviewed: intended geometry, text and raster layers preserved; edited copies intentionally change size and line weight.",
+      "RegroupMeanPixelError": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Structure": {
+        "slides": 1,
+        "width_pt": 340.0,
+        "height_pt": 270.0,
+        "textboxes": 9,
+        "vector_shapes": 9,
+        "images": 0,
+        "fonts": [
+          "Arial"
+        ],
+        "external_links": 0,
+        "groups": 0,
+        "grouping_locks": 0,
+        "placeholders": 0
+      }
+    }
+  }
+}

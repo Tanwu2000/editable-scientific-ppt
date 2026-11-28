@@ -189,7 +189,7 @@ for item in elements:
         for path in item['paths']:
             for x,y in path['points']:assert b[0]-1e-7<=x<=b[2]+1e-7 and b[1]-1e-7<=y<=b[3]+1e-7
 stats.update({'native_shapes':sum(x['kind']=='shape' for x in elements),'raster_images':sum(x['kind']=='image' for x in elements),'all_clipped_geometry_inside_panel':True})
-vb=numbers(root.get('viewBox'));payload={'width':vb[2],'height':vb[3],'elements':elements}
+vb=numbers(root.get('viewBox'));payload={'group':False,'width':vb[2],'height':vb[3],'elements':elements}
 (ROOT/'scene.json').write_text(json.dumps(payload,separators=(',',':')),encoding='utf-8')
 (ROOT/'native_geometry_check.json').write_text(json.dumps(stats,indent=2),encoding='utf-8')
 print(json.dumps(stats,indent=2))
